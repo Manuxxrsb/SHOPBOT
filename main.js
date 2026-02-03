@@ -44,21 +44,34 @@ app.post("/webhook", async (req, res) => {
 
 /* Enviar mensaje */
 async function sendMessage(to, text) {
-  await axios.post(
-    `https://graph.facebook.com/v19.0/${process.env.PHONE_NUMBER_ID}/messages`,
-    {
-      messaging_product: "whatsapp",
-      to,
-      text: { body: text },
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.TOKEN}`,
-        "Content-Type": "application/json",
+  try {
+    const response = await axios.post(
+      `https://graph.facebook.com/v19.0/${process.env.PHONE_NUMBER_ID}/messages`,
+      {
+        messaging_product: "whatsapp",
+        to: to,
+        type: "text",
+        text: {
+          body: text,
+        },
       },
-    }
-  );
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Mensaje enviado OK:", response.data);
+  } catch (error) {
+    console.error(
+      "Error enviando mensaje:",
+      error.response?.data || error.message
+    );
+  }
 }
+
 
 app.listen(process.env.PORT, () => {
   console.log(`Bot corriendo en puerto ${process.env.PORT}`);
