@@ -42,7 +42,16 @@ app.post("/webhook", async (req, res) => {
       text = text.toLowerCase();
       if(text.includes("buscar")){
         const conversationResult = await conversation(from, profileName, text);
-        await sendMessage(from, conversationResult);
+        // Formatear el resultado como string
+        let messageToSend;
+        if (Array.isArray(conversationResult) && conversationResult.length > 0) {
+          messageToSend = conversationResult.map((item, idx) => {
+            return `${idx + 1}. ${item.titulo || 'Producto'}\n💰 ${item.precio || 'N/D'}\n🏪 ${item.tienda || 'N/D'}\n🔗 ${item.link || ''}`;
+          }).join("\n\n");
+        } else {
+          messageToSend = "No se encontraron productos para tu búsqueda.";
+        }
+        await sendMessage(from, messageToSend);
       } else if(text === "hola" || text === "hi" || text === "hello"){
           await sendMessage(from, `Hola ${profileName}, que producto vamos a buscar hoy? escribe la palabra "buscar + [nombre producto]" para ayudarte.`);
       } else {
