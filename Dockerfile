@@ -24,7 +24,7 @@ WORKDIR /usr/src/app
 
 # Copy package files and install dependencies first for better caching
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
+RUN npm install
 
 # Copy app source
 COPY . .
