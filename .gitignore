@@ -147,6 +147,5 @@ media/
 temp/
 logs/
 database/
-.wwwebjs_cache
-.wwwebjs_auth
 .wwebjs_auth
+.wwebjs_cache
