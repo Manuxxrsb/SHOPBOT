@@ -6,6 +6,10 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+app.get("/ping", (req, res) => {
+  res.send("Bot de WhatsApp funcionando");
+});
+
 /* Verificación del webhook */
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
