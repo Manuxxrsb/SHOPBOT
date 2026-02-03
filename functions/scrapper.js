@@ -9,15 +9,24 @@ export async function scrapeKnasta(nombre_producto, limit = 4, options = {}) {
   try {
     console.log(`🔍 Buscando: "${nombre_producto}" en Knasta...`);
 
-    browser = await puppeteer.launch({
-      headless: true, // Modo moderno
+    const launchOptions = {
+      headless: true,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-gpu",
         "--disable-dev-shm-usage",
+        "--single-process",
       ],
-    });
+    };
+
+    // Si se definió la ruta de chrome en entorno (p.ej. en Render), úsala
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+      console.log("Usando ejecutable de Chrome desde:", launchOptions.executablePath);
+    }
+
+    browser = await puppeteer.launch(launchOptions);
 
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 800 });

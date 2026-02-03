@@ -43,7 +43,7 @@ app.post("/webhook", async (req, res) => {
       if(text === "hola" || text === "hi" || text === "hello"){
           await sendMessage(from, `Hola ${profileName}, que producto vamos a buscar hoy? escribe la palabra "Buscar + [nombre producto]" para ayudarte.`);
           if (text.includes("Buscar")){
-            let conversationResult = await conversation(from,profileName, text);
+            const conversationResult = await conversation(from,profileName, text);
             await sendMessage(from,conversationResult);
           } 
       } 
