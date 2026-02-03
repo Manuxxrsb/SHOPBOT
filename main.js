@@ -1,6 +1,7 @@
 import express from "express";
 import axios from "axios";
 import dotenv from "dotenv";
+import { conversation } from "./functions/conversation.js";
 
 dotenv.config();
 const app = express();
@@ -33,13 +34,23 @@ app.post("/webhook", async (req, res) => {
   if (message) {
     const from = message.from;
     const text = message.text?.body;
+    const profileName = contacts?.profile?.name;  // Nombre del perfil de WhatsApp
+    
 
-    console.log("Mensaje recibido:", text);
-
-    await sendMessage(from, `Recibí tu mensaje: ${text}`);
+    if(message.type === "text"){
+      text = text.toLowerCase();
+      if(text === "hola" || text === "hi" || text === "hello"){
+          await sendMessage(from, `Hola ${profileName}, que producto vamos a buscar hoy? escribe la palabra "Buscar + [nombre producto]" para ayudarte.`);
+          if (text.includes("Buscar")){
+            let conversationResult = await conversation(from,profileName, text);
+            await sendMessage(from,conversationResult);
+          } 
+      } 
+      }else {
+      await sendMessage(from, `Solo puedo procesar mensajes de texto por ahora.`);
+      } 
+    res.sendStatus(200);
   }
-
-  res.sendStatus(200);
 });
 
 /* Enviar mensaje */
