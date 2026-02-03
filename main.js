@@ -40,16 +40,15 @@ app.post("/webhook", async (req, res) => {
 
     if(message.type === "text"){
       text = text.toLowerCase();
-      if(text === "hola" || text === "hi" || text === "hello"){
+      if(text.includes("buscar")){
+        const conversationResult = await conversation(from, profileName, text);
+        await sendMessage(from, conversationResult);
+      } else if(text === "hola" || text === "hi" || text === "hello"){
           await sendMessage(from, `Hola ${profileName}, que producto vamos a buscar hoy? escribe la palabra "buscar + [nombre producto]" para ayudarte.`);
-          if (text.includes("buscar")){
-            const conversationResult = await conversation(from,profileName, text);
-            await sendMessage(from,conversationResult);
-          } 
-      } 
-      }else {
-      await sendMessage(from, `Solo puedo procesar mensajes de texto por ahora.`);
-      } 
+      } else {
+        await sendMessage(from, `Solo puedo procesar mensajes de texto por ahora.`);
+      }
+    }
     res.sendStatus(200);
   }
 });
