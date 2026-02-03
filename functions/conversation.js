@@ -1,4 +1,4 @@
-import { scrapeKnasta } from './scraper.js';
+import { scrapeKnasta } from './scrapper.js';
 
 export async function conversation(from, profileName, text) {
     try {
@@ -14,7 +14,7 @@ export async function conversation(from, profileName, text) {
         const list = await scrapeKnasta(product, 3);
         
         return list;
-        
+
     } catch (error) {
         console.error(`Error en la conversación con ${profileName}:`, error);
         return [];
