@@ -34,7 +34,7 @@ app.post("/webhook", async (req, res) => {
 
   if (message) {
     const from = message.from;
-    const text = message.text?.body;
+    let text = message.text?.body;
     const profileName = contacts?.profile?.name;  // Nombre del perfil de WhatsApp
     
 
