@@ -30,6 +30,7 @@ app.post("/webhook", async (req, res) => {
   const entry = req.body.entry?.[0];
   const changes = entry?.changes?.[0];
   const message = changes?.value?.messages?.[0];
+  const contacts = changes?.value?.contacts?.[0];
 
   if (message) {
     const from = message.from;
