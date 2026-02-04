@@ -9,15 +9,25 @@ export async function scrapeKnasta(nombre_producto, limit = 4, options = {}) {
   try {
     console.log(`🔍 Buscando: "${nombre_producto}" en Knasta...`);
 
-    browser = await puppeteer.launch({
-      headless: true, // Modo moderno
+    const launchOptions = {
+      headless: true,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-gpu",
         "--disable-dev-shm-usage",
+        "--disable-web-resources",
+        "--disable-sync",
       ],
-    });
+    };
+
+    // Si se definió la ruta de chrome en entorno (p.ej. en Render), úsala
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+      console.log("Usando ejecutable de Chrome desde:", launchOptions.executablePath);
+    }
+
+    browser = await puppeteer.launch(launchOptions);
 
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 800 });
@@ -28,14 +38,21 @@ export async function scrapeKnasta(nombre_producto, limit = 4, options = {}) {
     const url = buildSearchUrl(nombre_producto);
     console.log(`📡 Navegando a: ${url}`);
 
-    // Aumentamos un poco el tiempo de espera por si la conexión es lenta
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 45000 });
+    // Navegar con timeout más largo y waitUntil más conservador
+    try {
+      await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
+      // Esperar un poco adicional para que se carguen dinámicamente los productos
+      await page.waitForTimeout(2000);
+    } catch (navError) {
+      console.warn("⚠️ Advertencia en navegación:", navError.message);
+      // Continuar aun si hay errores menores en la navegación
+    }
 
     const selector = "article.new-product-box_productBox__CSUHu";
     
     // Esperar que aparezcan los productos
     const productsFound = await page
-      .waitForSelector(selector, { timeout: 15000 })
+      .waitForSelector(selector, { timeout: 20000 })
       .then(() => true)
       .catch(() => false);
 
@@ -72,6 +89,9 @@ export async function scrapeKnasta(nombre_producto, limit = 4, options = {}) {
 
   } catch (error) {
     console.error("❌ Error en scrapeKnasta:", error.message);
+    if (error.message.includes("detached") || error.message.includes("Navigation")) {
+      console.warn("⚠️ Problema de navegación/frame detached - puede ocurrir en entornos con muchas limitaciones de recursos");
+    }
     return []; // Devolvemos array vacío en lugar de romper el flujo
   } finally {
     if (browser) {
