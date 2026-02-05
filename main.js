@@ -7,7 +7,7 @@ import generateContent from "./functions/gemini.js";
 
 //carga de variables de entorno
 dotenv.config();
-const prompt = await readfile.readFile("./promppt/prompt.txt", "utf-8");
+const prompt = await readfile.readFile("prompt/prompt.txt", "utf-8");
 
 //creacion del servidor express
 const app = express();
@@ -60,9 +60,9 @@ app.post("/webhook", async (req, res) => {
         }
         await sendMessage(from, messageToSend);
       } else if(text === "hola" || text === "ola" || text === "hello"){
-          await sendMessage(from, `Hola ${profileName}, ¿que producto vamos a buscar hoy? escribe la palabra "buscar + [nombre producto]" para ayudarte.`);
+          await sendMessage(from, `Hola ${profileName}, ¿que producto vamos a buscar hoy? escribe \n "buscar + [nombre producto]" para buscar un producto \n "descripcion + [descripcion con tus palabras del producto]" para ayudarte a saber cual es tu producto.`);
       } if(text.includes("descripcion") || text.includes("descripción")){
-        await sendMessage(from, `Generando descripción del producto, por favor espera...`);
+        await sendMessage(from, `Pensando en cual puede ser su producto , por favor espera...`);
         const productName = await generateContent(process.env.GOOGLE_API_KEY, prompt + text);
         const match = productName.match(/\[([^\]]+)\]/);
         const products = match ? match[1].split(',').map(p => p.trim()) : [];
