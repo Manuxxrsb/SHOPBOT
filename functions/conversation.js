@@ -1,9 +1,9 @@
 import { scrapeKnasta } from './scrapper.js';
 
 export async function conversation(from, profileName, text) {
+    console.log(`Iniciando busqueda para ${profileName} (${from})`);
     try {
-        console.log(`Iniciando conversación con ${profileName} (${from})`);
-        
+
         const product = text.slice(7).trim(); 
         
         if (!product) {
@@ -12,11 +12,10 @@ export async function conversation(from, profileName, text) {
         }
 
         const list = await scrapeKnasta(product, 3);
-        
         return list;
 
     } catch (error) {
-        console.error(`Error en la conversación con ${profileName}:`, error);
+        console.error(`Error en la busqueda para ${profileName}:`, error);
         return [];
     }
 }
