@@ -7,7 +7,7 @@ import generateContent from "./functions/gemini.js";
 
 //carga de variables de entorno
 dotenv.config();
-const prompt = await readfile.readFile("prompt.txt", "utf-8");
+const prompt = await readfile.readFile("./promppt/prompt.txt", "utf-8");
 
 //creacion del servidor express
 const app = express();
