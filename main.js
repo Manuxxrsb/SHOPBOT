@@ -2,10 +2,18 @@ import express from "express";
 import axios from "axios";
 import dotenv from "dotenv";
 import { conversation } from "./functions/conversation.js";
+import readfile from "fs/promises";
+import generateContent from "./functions/gemini.js";
 
+//carga de variables de entorno
 dotenv.config();
+const prompt = await readfile.readFile("prompt.txt", "utf-8");
+
+//creacion del servidor express
 const app = express();
 app.use(express.json());
+
+//Endpoint del boot
 
 app.get("/ping", (req, res) => {
   res.send("Bot de WhatsApp funcionando");
@@ -37,12 +45,11 @@ app.post("/webhook", async (req, res) => {
     let text = message.text?.body;
     const profileName = contacts?.profile?.name;  // Nombre del perfil de WhatsApp
     
-
     if(message.type === "text"){
       text = text.toLowerCase();
       if(text.includes("buscar")){
+        await sendMessage(from, `Buscando "${text.slice(7).trim()}", por favor espera...`);
         const conversationResult = await conversation(from, profileName, text);
-        // Formatear el resultado como string
         let messageToSend;
         if (Array.isArray(conversationResult) && conversationResult.length > 0) {
           messageToSend = conversationResult.map((item, idx) => {
@@ -52,9 +59,15 @@ app.post("/webhook", async (req, res) => {
           messageToSend = "No se encontraron productos para tu búsqueda.";
         }
         await sendMessage(from, messageToSend);
-      } else if(text === "hola" || text === "hi" || text === "hello"){
-          await sendMessage(from, `Hola ${profileName}, que producto vamos a buscar hoy? escribe la palabra "buscar + [nombre producto]" para ayudarte.`);
-      } else {
+      } else if(text === "hola" || text === "ola" || text === "hello"){
+          await sendMessage(from, `Hola ${profileName}, ¿que producto vamos a buscar hoy? escribe la palabra "buscar + [nombre producto]" para ayudarte.`);
+      } if(text.includes("descripcion") || text.includes("descripción")){
+        await sendMessage(from, `Generando descripción del producto, por favor espera...`);
+        const productName = await generateContent(process.env.GOOGLE_API_KEY, prompt + text);
+        const match = productName.match(/\[([^\]]+)\]/);
+        const products = match ? match[1].split(',').map(p => p.trim()) : [];
+        await sendMessage(from, `posibles productos: ${products.join(', ')}, si encontre tu producto escribe la palabra buscar + [nombre producto] para ayudarte a cotizarlo.`);
+      }else {
         await sendMessage(from, `Solo puedo procesar mensajes de texto por ahora.`);
       }
     }
