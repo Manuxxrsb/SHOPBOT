@@ -63,7 +63,7 @@ app.post("/webhook", async (req, res) => {
           await sendMessage(from, `Hola ${profileName}, ¿que producto vamos a buscar hoy? escribe \n "buscar + [nombre producto]" para buscar un producto \n "descripcion + [descripcion con tus palabras del producto]" para ayudarte a saber cual es tu producto.`);
       } if(text.includes("descripcion") || text.includes("descripción")){
         await sendMessage(from, `Pensando en cual puede ser su producto , por favor espera...`);
-        const productName = await generateContent(process.env.GOOGLE_API_KEY, prompt + text);
+        const productName = await generateContent(process.env.GOOGLE_API_KEY, prompt , text);
         const match = productName.match(/\[([^\]]+)\]/);
         const products = match ? match[1].split(',').map(p => p.trim()) : [];
         await sendMessage(from, `posibles productos: ${products}, si encontre tu producto escribe la palabra buscar + [nombre producto] para ayudarte a cotizarlo.`);
