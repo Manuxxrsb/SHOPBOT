@@ -37,7 +37,6 @@ app.post("/webhook", async (req, res) => {
     let text = message.text?.body;
     const profileName = contacts?.profile?.name;  // Nombre del perfil de WhatsApp
     
-
     if(message.type === "text"){
       text = text.toLowerCase();
       if(text.includes("buscar")){
