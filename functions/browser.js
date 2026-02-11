@@ -1,35 +1,36 @@
-import { scrapeKnasta } from "./scrapers/knasta.js";
-import { scrapeRipley } from "./scrapers/ripley.js";
+import puppeteer from "puppeteer";
 
-export async function conversation(from, profileName, text) {
-  console.log(`🔎 Iniciando búsqueda para ${profileName} (${from})`);
+let browser = null;
 
-  try {
-    const product = text.slice(7).trim();
+export async function getBrowser() {
+  if (!browser) {
+    console.log("🚀 Lanzando browser optimizado para Render...");
 
-    if (!product) {
-      console.log("⚠️ No se proporcionó un nombre de producto");
-      return [];
-    }
+    browser = await puppeteer.launch({
+      headless: "new",
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--single-process",
+        "--no-zygote",
+        "--disable-extensions",
+        "--disable-background-networking",
+        "--disable-default-apps",
+        "--disable-sync",
+        "--disable-translate",
+        "--metrics-recording-only",
+        "--mute-audio",
+        "--no-first-run",
+      ],
+    });
 
-    console.log(`🛒 Producto solicitado: ${product}`);
-
-    // 🔥 EJECUCIÓN EN SECUENCIA (NO PARALELO)
-    const knastaResults = await scrapeKnasta(product, 3);
-
-    // pequeño delay para que Render respire
-    await new Promise((r) => setTimeout(r, 1500));
-
-    const ripleyResults = await scrapeRipley(product, 3);
-
-    const results = [...knastaResults, ...ripleyResults];
-
-    console.log(`✅ Total productos encontrados: ${results.length}`);
-
-    return results;
-
-  } catch (error) {
-    console.error(`❌ Error en la búsqueda para ${profileName}:`, error.message);
-    return [];
+    browser.on("disconnected", () => {
+      console.log("⚠️ Browser se cerró inesperadamente");
+      browser = null;
+    });
   }
+
+  return browser;
 }
