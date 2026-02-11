@@ -1,35 +1,35 @@
-import puppeteer from "puppeteer";
+import { scrapeKnasta } from "./scrapers/knasta.js";
+import { scrapeRipley } from "./scrapers/ripley.js";
 
-let browserInstance = null;
+export async function conversation(from, profileName, text) {
+  console.log(`🔎 Iniciando búsqueda para ${profileName} (${from})`);
 
-export async function getBrowser() {
-  if (!browserInstance) {
-    console.log("🚀 Lanzando browser...");
+  try {
+    const product = text.slice(7).trim();
 
-    browserInstance = await puppeteer.launch({
-      headless: "new",
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-      ],
-    });
-  }
-
-  return browserInstance;
-}
-
-export async function closeBrowser() {
-  if (browserInstance) {
-    console.log("🧹 Cerrando browser...");
-
-    const pages = await browserInstance.pages();
-
-    for (const page of pages) {
-      await page.close().catch(() => {});
+    if (!product) {
+      console.log("⚠️ No se proporcionó un nombre de producto");
+      return [];
     }
 
-    await browserInstance.close();
-    browserInstance = null;
+    console.log(`🛒 Producto solicitado: ${product}`);
+
+    // 🔥 EJECUCIÓN EN SECUENCIA (NO PARALELO)
+    const knastaResults = await scrapeKnasta(product, 3);
+
+    // pequeño delay para que Render respire
+    await new Promise((r) => setTimeout(r, 1500));
+
+    const ripleyResults = await scrapeRipley(product, 3);
+
+    const results = [...knastaResults, ...ripleyResults];
+
+    console.log(`✅ Total productos encontrados: ${results.length}`);
+
+    return results;
+
+  } catch (error) {
+    console.error(`❌ Error en la búsqueda para ${profileName}:`, error.message);
+    return [];
   }
 }
