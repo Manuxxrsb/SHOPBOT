@@ -27,9 +27,11 @@ export async function conversation(from, profileName, text) {
     console.log(`✅ Total productos encontrados: ${results.length}`);
 
     return results;
-
   } catch (error) {
-    console.error(`❌ Error en la búsqueda para ${profileName}:`, error.message);
+    console.error(
+      `❌ Error en la búsqueda para ${profileName}:`,
+      error.message,
+    );
     return [];
   }
 }

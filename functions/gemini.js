@@ -5,13 +5,13 @@ export async function generateContent(apikey, prompt, text) {
   const ai = new GoogleGenAI({
     apiKey: apikey,
   });
-  
-const input = prompt + " " + text.slice(11).trim();
 
-const response = await ai.models.generateContent({
+  const input = prompt + " " + text.slice(11).trim();
+
+  const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: input,
-});
+  });
   return response.text;
 }
 

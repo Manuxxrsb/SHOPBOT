@@ -13,7 +13,9 @@ export async function scrapeKnasta(nombre_producto, limit = 3) {
     // 🔥 bloquear recursos pesados
     await page.setRequestInterception(true);
     page.on("request", (req) => {
-      if (["image", "stylesheet", "font", "media"].includes(req.resourceType())) {
+      if (
+        ["image", "stylesheet", "font", "media"].includes(req.resourceType())
+      ) {
         req.abort();
       } else {
         req.continue();
@@ -27,23 +29,23 @@ export async function scrapeKnasta(nombre_producto, limit = 3) {
       timeout: 30000,
     });
 
-    await page.waitForSelector(
-      "article.new-product-box_productBox__CSUHu",
-      { timeout: 15000 }
-    );
+    await page.waitForSelector("article.new-product-box_productBox__CSUHu", {
+      timeout: 15000,
+    });
 
     const data = await page.$$eval(
       "article.new-product-box_productBox__CSUHu",
       (articles, limit) =>
         articles.slice(0, limit).map((article) => {
           const titleEl = article.querySelector(
-            "h3.product-box-title_productTitle___pv5Q a"
+            "h3.product-box-title_productTitle___pv5Q a",
           );
 
           return {
             titulo: titleEl?.textContent.trim() || null,
             precio:
-              article.querySelector(".product-box-price_currentPrice__AAih6")
+              article
+                .querySelector(".product-box-price_currentPrice__AAih6")
                 ?.textContent.trim() || null,
             tienda: "Knasta",
             link: titleEl
@@ -51,12 +53,11 @@ export async function scrapeKnasta(nombre_producto, limit = 3) {
               : null,
           };
         }),
-      limit
+      limit,
     );
 
     console.log(`✅ Knasta encontró ${data.length} productos`);
     return data;
-
   } catch (error) {
     console.error("❌ Error Knasta:", error.message);
     return [];
