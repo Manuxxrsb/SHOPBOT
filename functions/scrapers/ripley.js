@@ -1,7 +1,7 @@
 import { getBrowser } from "../browser.js";
 
 const buildRipleyUrl = (producto) =>
-  `https://simple.ripley.cl/search/${encodeURIComponent(producto)}?sort=relevance_desc&page=1`;
+  `https://simple.ripley.cl/search/${encodeURIComponent(producto)}`;
 
 export async function scrapeRipley(nombre_producto, limit = 3) {
   let page;
@@ -25,35 +25,45 @@ export async function scrapeRipley(nombre_producto, limit = 3) {
     console.log(`🔍 Buscando "${nombre_producto}" en Ripley...`);
 
     await page.goto(buildRipleyUrl(nombre_producto), {
-      waitUntil: "domcontentloaded",
+      waitUntil: "networkidle2",
       timeout: 30000,
     });
 
-    await page.waitForSelector(".catalog-product-border", {
-      timeout: 15000,
+    // 🔥 Esperamos el contenedor principal de productos
+    await page.waitForSelector("div.catalog-page__product-grid--with-sidebar", {
+      timeout: 20000,
+    });
+
+    // 🔥 Esperamos productos individuales
+    await page.waitForSelector("div.catalog-product-item", {
+      timeout: 20000,
     });
 
     const data = await page.$$eval(
-      ".catalog-product-border",
-      (items, limit) =>
-        items.slice(0, limit).map((item) => {
-          const anchor = item.querySelector("a.catalog-product-item");
+      "div.catalog-product-item",
+      (items, limit) => {
+        return items.slice(0, limit).map((item) => {
+          const anchor = item.querySelector("a[href*='/p/']");
+          const title =
+            item
+              .querySelector(".catalog-product-details__name")
+              ?.innerText.trim() || null;
+
+          const price =
+            item
+              .querySelector(".catalog-prices__offer-price")
+              ?.innerText.trim() || null;
 
           return {
-            titulo:
-              item
-                .querySelector(".catalog-product-details__name")
-                ?.innerText.trim() || null,
-            precio:
-              item
-                .querySelector(".catalog-prices__offer-price")
-                ?.innerText.trim() || null,
+            titulo: title,
+            precio: price,
             tienda: "Ripley",
             link: anchor
               ? `https://simple.ripley.cl${anchor.getAttribute("href")}`
               : null,
           };
-        }),
+        });
+      },
       limit,
     );
 

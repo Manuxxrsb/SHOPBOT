@@ -2,18 +2,24 @@ import express from "express";
 import axios from "axios";
 import dotenv from "dotenv";
 import { conversation } from "./functions/conversation.js";
+import { initBrowser, closeBrowser } from "./functions/browser.js";
 import readfile from "fs/promises";
 import generateContent from "./functions/gemini.js";
 
-//carga de variables de entorno
 dotenv.config();
+
 const prompt = await readfile.readFile("prompt/prompt.txt", "utf-8");
 
-//creacion del servidor express
 const app = express();
 app.use(express.json());
 
-//Endpoint del boot
+/* ============================= */
+/* 🔥 INICIALIZAR BROWSER AQUÍ */
+/* ============================= */
+
+await initBrowser();
+
+/* ============================= */
 
 app.get("/ping", (req, res) => {
   res.send("Bot de WhatsApp funcionando");
@@ -43,29 +49,36 @@ app.post("/webhook", async (req, res) => {
   if (message) {
     const from = message.from;
     let text = message.text?.body;
-    const profileName = contacts?.profile?.name; // Nombre del perfil de WhatsApp
+    const profileName = contacts?.profile?.name;
 
     if (message.type === "text") {
       text = text.toLowerCase();
+
       if (text.includes("buscar")) {
         await sendMessage(
           from,
           `🔍 Buscando "${text.slice(7).trim()}", por favor espera... ⌛️`,
         );
+
         const conversationResult = await conversation(from, profileName, text);
+
         let messageToSend;
+
         if (
           Array.isArray(conversationResult) &&
           conversationResult.length > 0
         ) {
           messageToSend = conversationResult
             .map((item, idx) => {
-              return `${idx + 1}. ${item.titulo || "Producto"}\n💰 ${item.precio || "N/D"}\n🏪 ${item.tienda || "N/D"}\n🔗 ${item.link || ""}`;
+              return `${idx + 1}. ${item.titulo || "Producto"}\n💰 ${
+                item.precio || "N/D"
+              }\n🏪 ${item.tienda || "N/D"}\n🔗 ${item.link || ""}`;
             })
             .join("\n\n");
         } else {
           messageToSend = "No se encontraron productos para tu búsqueda. ❌";
         }
+
         await sendMessage(from, messageToSend);
       } else if (text === "hola" || text === "ola" || text === "hello") {
         await sendMessage(
@@ -77,13 +90,16 @@ app.post("/webhook", async (req, res) => {
           from,
           `💡 Pensando en cual puede ser su producto , por favor espera...⌛️`,
         );
+
         const productName = await generateContent(
           process.env.GOOGLE_API_KEY,
           prompt,
           text,
         );
+
         const match = productName.match(/\[([^\]]+)\]/);
         const products = match ? match[1].split(",").map((p) => p.trim()) : [];
+
         await sendMessage(
           from,
           `🧐 posibles productos: ${products} \n \t 🕵️‍♂️ si encontre tu producto escribe la palabra buscar + [nombre producto] para ayudarte a cotizarlo.`,
@@ -95,6 +111,7 @@ app.post("/webhook", async (req, res) => {
         );
       }
     }
+
     res.sendStatus(200);
   }
 });
@@ -128,6 +145,22 @@ async function sendMessage(to, text) {
     );
   }
 }
+
+/* ============================= */
+/* 🔥 CERRAR BROWSER AL APAGAR */
+/* ============================= */
+
+process.on("SIGINT", async () => {
+  await closeBrowser();
+  process.exit(0);
+});
+
+process.on("SIGTERM", async () => {
+  await closeBrowser();
+  process.exit(0);
+});
+
+/* ============================= */
 
 app.listen(process.env.PORT, () => {
   console.log(`Bot corriendo en puerto ${process.env.PORT}`);

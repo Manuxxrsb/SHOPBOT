@@ -14,12 +14,7 @@ export async function conversation(from, profileName, text) {
 
     console.log(`🛒 Producto solicitado: ${product}`);
 
-    // 🔥 EJECUCIÓN EN SECUENCIA (NO PARALELO)
     const knastaResults = await scrapeKnasta(product, 3);
-
-    // pequeño delay para que Render respire
-    await new Promise((r) => setTimeout(r, 1500));
-
     const ripleyResults = await scrapeRipley(product, 3);
 
     const results = [...knastaResults, ...ripleyResults];

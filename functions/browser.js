@@ -1,29 +1,14 @@
 import puppeteer from "puppeteer";
 
-let browser = null;
+let browser;
 
-export async function getBrowser() {
+export async function initBrowser() {
   if (!browser) {
-    console.log("🚀 Lanzando browser optimizado para Render...");
+    console.log("🚀 Iniciando browser global...");
 
     browser = await puppeteer.launch({
       headless: "new",
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--single-process",
-        "--no-zygote",
-        "--disable-extensions",
-        "--disable-background-networking",
-        "--disable-default-apps",
-        "--disable-sync",
-        "--disable-translate",
-        "--metrics-recording-only",
-        "--mute-audio",
-        "--no-first-run",
-      ],
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     browser.on("disconnected", () => {
@@ -33,4 +18,19 @@ export async function getBrowser() {
   }
 
   return browser;
+}
+
+export function getBrowser() {
+  if (!browser) {
+    throw new Error("Browser no inicializado. Llama initBrowser() primero.");
+  }
+  return browser;
+}
+
+export async function closeBrowser() {
+  if (browser) {
+    console.log("🧹 Cerrando browser...");
+    await browser.close();
+    browser = null;
+  }
 }

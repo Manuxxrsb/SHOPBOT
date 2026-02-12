@@ -1,36 +1,24 @@
 import { getBrowser } from "../browser.js";
 
-const buildSearchUrl = (nombre_producto) =>
-  `https://knasta.cl/results?q=${encodeURIComponent(nombre_producto)}`;
-
-export async function scrapeKnasta(nombre_producto, limit = 3) {
+export async function scrapeKnasta(nombre_producto, limit = 4) {
   let page;
 
   try {
-    const browser = await getBrowser();
+    const browser = getBrowser();
     page = await browser.newPage();
 
-    // 🔥 bloquear recursos pesados
-    await page.setRequestInterception(true);
-    page.on("request", (req) => {
-      if (
-        ["image", "stylesheet", "font", "media"].includes(req.resourceType())
-      ) {
-        req.abort();
-      } else {
-        req.continue();
-      }
-    });
+    await page.setViewport({ width: 1280, height: 800 });
 
-    console.log(`🔍 Buscando "${nombre_producto}" en Knasta...`);
-
-    await page.goto(buildSearchUrl(nombre_producto), {
-      waitUntil: "domcontentloaded",
-      timeout: 30000,
-    });
+    await page.goto(
+      `https://knasta.cl/results?q=${encodeURIComponent(nombre_producto)}`,
+      {
+        waitUntil: "domcontentloaded",
+        timeout: 60000,
+      },
+    );
 
     await page.waitForSelector("article.new-product-box_productBox__CSUHu", {
-      timeout: 15000,
+      timeout: 20000,
     });
 
     const data = await page.$$eval(
@@ -56,12 +44,13 @@ export async function scrapeKnasta(nombre_producto, limit = 3) {
       limit,
     );
 
-    console.log(`✅ Knasta encontró ${data.length} productos`);
     return data;
   } catch (error) {
     console.error("❌ Error Knasta:", error.message);
     return [];
   } finally {
-    if (page) await page.close();
+    if (page && !page.isClosed()) {
+      await page.close();
+    }
   }
 }
