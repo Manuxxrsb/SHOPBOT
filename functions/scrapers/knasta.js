@@ -31,20 +31,32 @@ export async function scrapeKnasta(nombre_producto, limit = 4) {
             "h3.product-box-title_productTitle___pv5Q a",
           );
 
-          const precioActual =
-            article
-              .querySelector("[class*='currentPrice']")
-              ?.textContent.trim() || null;
+          // 🔥 Precio actual limpio
+          const precioActualElement = article.querySelector(
+            "span[class*='currentPrice']",
+          );
 
-          const precioAnterior =
-            article
-              .querySelector("[class*='originalPrice']")
-              ?.textContent.trim() || null;
+          const precioActual = precioActualElement
+            ? precioActualElement.innerText.trim()
+            : null;
 
-          const descuento =
-            article
-              .querySelector("[class*='percentText']")
-              ?.textContent.trim() || null;
+          // 🔥 Precio anterior limpio
+          const precioAnteriorElement = article.querySelector(
+            "div[class*='originalPrice']",
+          );
+
+          const precioAnterior = precioAnteriorElement
+            ? precioAnteriorElement.innerText.trim()
+            : null;
+
+          // 🔥 Descuento limpio (solo porcentaje)
+          const descuentoElement = article.querySelector(
+            "span[class*='percentText']",
+          );
+
+          const descuento = descuentoElement
+            ? descuentoElement.innerText.replace("de descuento.", "").trim()
+            : null;
 
           return {
             titulo: titleEl?.textContent.trim() || null,

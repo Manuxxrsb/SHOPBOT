@@ -7,7 +7,7 @@ export async function scrapeParis(nombre_producto, limit = 3) {
   let page;
 
   try {
-    const browser = await getBrowser();
+    const browser = getBrowser();
     page = await browser.newPage();
 
     console.log(`🔍 Buscando "${nombre_producto}" en Paris...`);
@@ -30,19 +30,43 @@ export async function scrapeParis(nombre_producto, limit = 3) {
           if (results.length >= limit) break;
 
           const name = item.getAttribute("data-cnstrc-item-name");
-          const priceRaw = item.getAttribute("data-cnstrc-item-price");
-
-          // 🔥 Si no hay precio, saltamos este producto
-          if (!priceRaw) continue;
-
           const anchor = item.querySelector("a[href]");
           const link = anchor
             ? `https://www.paris.cl${anchor.getAttribute("href")}`
             : null;
 
+          // 🔥 Precio actual (sin line-through)
+          const priceElement = item.querySelector(
+            "[data-testid='paris-pod-price'] span:not(.ui-line-through)",
+          );
+
+          const precio = priceElement ? priceElement.innerText.trim() : null;
+
+          if (!precio) continue; // si no hay precio, saltamos
+
+          // 🔥 Precio anterior (tachado)
+          const oldPriceElement = item.querySelector(
+            "[data-testid='paris-pod-price'] span.ui-line-through",
+          );
+
+          const precioAnterior = oldPriceElement
+            ? oldPriceElement.innerText.trim()
+            : null;
+
+          // 🔥 Descuento
+          const discountElement = item.querySelector(
+            "[data-testid='paris-label']",
+          );
+
+          const descuento = discountElement
+            ? discountElement.innerText.trim()
+            : null;
+
           results.push({
             titulo: name || null,
-            precio: `$${Number(priceRaw).toLocaleString("es-CL")}`,
+            precio,
+            precioAnterior,
+            descuento,
             tienda: "Paris",
             link,
           });
