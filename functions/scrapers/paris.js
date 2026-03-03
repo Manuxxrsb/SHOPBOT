@@ -17,7 +17,6 @@ export async function scrapeParis(nombre_producto, limit = 3) {
       timeout: 30000,
     });
 
-    // Esperamos que aparezcan los productos
     await page.waitForSelector("div[role='gridcell']", {
       timeout: 30000,
     });
@@ -25,29 +24,36 @@ export async function scrapeParis(nombre_producto, limit = 3) {
     const data = await page.$$eval(
       "div[role='gridcell']",
       (items, limit) => {
-        return items.slice(0, limit).map((item) => {
+        const results = [];
+
+        for (const item of items) {
+          if (results.length >= limit) break;
+
           const name = item.getAttribute("data-cnstrc-item-name");
           const priceRaw = item.getAttribute("data-cnstrc-item-price");
+
+          // 🔥 Si no hay precio, saltamos este producto
+          if (!priceRaw) continue;
 
           const anchor = item.querySelector("a[href]");
           const link = anchor
             ? `https://www.paris.cl${anchor.getAttribute("href")}`
             : null;
 
-          return {
+          results.push({
             titulo: name || null,
-            precio: priceRaw
-              ? `$${Number(priceRaw).toLocaleString("es-CL")}`
-              : null,
+            precio: `$${Number(priceRaw).toLocaleString("es-CL")}`,
             tienda: "Paris",
             link,
-          };
-        });
+          });
+        }
+
+        return results;
       },
       limit,
     );
 
-    console.log(`✅ Paris encontró ${data.length} productos`);
+    console.log(`✅ Paris encontró ${data.length} productos válidos`);
     return data;
   } catch (error) {
     console.error("❌ Error Paris:", error.message);
