@@ -35,7 +35,7 @@ export async function scrapeParis(nombre_producto, limit = 3) {
             ? `https://www.paris.cl${anchor.getAttribute("href")}`
             : null;
 
-          // 🔥 Precio actual (sin line-through)
+          //precio
           const priceElement = item.querySelector(
             "[data-testid='paris-pod-price'] span:not(.ui-line-through)",
           );
@@ -44,7 +44,6 @@ export async function scrapeParis(nombre_producto, limit = 3) {
 
           if (!precio) continue; // si no hay precio, saltamos
 
-          // 🔥 Precio anterior (tachado)
           const oldPriceElement = item.querySelector(
             "[data-testid='paris-pod-price'] span.ui-line-through",
           );
@@ -53,7 +52,7 @@ export async function scrapeParis(nombre_producto, limit = 3) {
             ? oldPriceElement.innerText.trim()
             : null;
 
-          // 🔥 Descuento
+          //descuento
           const discountElement = item.querySelector(
             "[data-testid='paris-label']",
           );

@@ -31,7 +31,7 @@ export async function scrapeKnasta(nombre_producto, limit = 4) {
             "h3.product-box-title_productTitle___pv5Q a",
           );
 
-          // 🔥 Precio actual limpio
+          // Precio actual
           const precioActualElement = article.querySelector(
             "span[class*='currentPrice']",
           );
@@ -40,7 +40,6 @@ export async function scrapeKnasta(nombre_producto, limit = 4) {
             ? precioActualElement.innerText.trim()
             : null;
 
-          // 🔥 Precio anterior limpio
           const precioAnteriorElement = article.querySelector(
             "div[class*='originalPrice']",
           );
@@ -49,7 +48,6 @@ export async function scrapeKnasta(nombre_producto, limit = 4) {
             ? precioAnteriorElement.innerText.trim()
             : null;
 
-          // 🔥 Descuento limpio (solo porcentaje)
           const descuentoElement = article.querySelector(
             "span[class*='percentText']",
           );
