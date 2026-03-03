@@ -21,3 +21,7 @@ Actual login via QR
 1. `docker run -d -p 3000:3000 shopbot `
 
 -d es para que se ejecute detach por si se cierra la consola
+
+# build in a local
+
+npm start
