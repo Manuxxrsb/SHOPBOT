@@ -7,6 +7,8 @@ export async function scrapeKnasta(nombre_producto, limit = 4) {
     const browser = getBrowser();
     page = await browser.newPage();
 
+    console.log(`🔍 Buscando "${nombre_producto}" en knasta...`);
+
     await page.setViewport({ width: 1280, height: 800 });
 
     await page.goto(
@@ -29,12 +31,26 @@ export async function scrapeKnasta(nombre_producto, limit = 4) {
             "h3.product-box-title_productTitle___pv5Q a",
           );
 
+          const precioActual =
+            article
+              .querySelector("[class*='currentPrice']")
+              ?.textContent.trim() || null;
+
+          const precioAnterior =
+            article
+              .querySelector("[class*='originalPrice']")
+              ?.textContent.trim() || null;
+
+          const descuento =
+            article
+              .querySelector("[class*='percentText']")
+              ?.textContent.trim() || null;
+
           return {
             titulo: titleEl?.textContent.trim() || null,
-            precio:
-              article
-                .querySelector(".product-box-price_currentPrice__AAih6")
-                ?.textContent.trim() || null,
+            precio: precioActual,
+            precioAnterior,
+            descuento,
             tienda: "Knasta",
             link: titleEl
               ? `https://knasta.cl${titleEl.getAttribute("href")}`

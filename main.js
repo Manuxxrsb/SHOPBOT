@@ -70,11 +70,29 @@ app.post("/webhook", async (req, res) => {
         ) {
           messageToSend = conversationResult
             .map((item, idx) => {
-              return `${idx + 1}. ${item.titulo || "Producto"}\n💰 ${
-                item.precio || "N/D"
-              }\n🏪 ${item.tienda || "N/D"}\n🔗 ${item.link || ""}`;
+              let mensaje = `*${idx + 1}. ${item.titulo || "Producto"}*\n`;
+
+              if (item.precio) {
+                mensaje += `💰 Precio: ${item.precio}\n`;
+              }
+
+              if (item.precioAnterior) {
+                mensaje += `🏷️ Antes: ${item.precioAnterior}\n`;
+              }
+
+              if (item.descuento) {
+                mensaje += `🔥 Descuento: ${item.descuento}\n`;
+              }
+
+              mensaje += `🏪 Tienda: ${item.tienda || "N/D"}\n`;
+
+              if (item.link) {
+                mensaje += `🔗 ${item.link}`;
+              }
+
+              return mensaje;
             })
-            .join("\n\n");
+            .join("\n\n──────────────\n\n");
         } else {
           messageToSend = "No se encontraron productos para tu búsqueda. ❌";
         }
