@@ -16,12 +16,16 @@ export async function conversation(from, profileName, text) {
 
     console.log(`🛒 Producto solicitado: ${product}`);
 
-    //const knastaResults = await scrapeKnasta(product, 3);
-    //const parisResults = await scrapeParis(product, 3);
-    //const easyResults = await scrapeEasy(product, 3);
-    //const results = bestPrice([...knastaResults, ...parisResults,...easyResults]);
+    const knastaResults = await scrapeKnasta(product, 3);
+    const parisResults = await scrapeParis(product, 3);
+    const easyResults = await scrapeEasy(product, 3);
+    const results = bestPrice([
+      ...knastaResults,
+      ...parisResults,
+      ...easyResults,
+    ]);
 
-    const results = [];
+    //const results = [];
 
     console.log(`✅ Total productos encontrados: ${results.length}`);
 
