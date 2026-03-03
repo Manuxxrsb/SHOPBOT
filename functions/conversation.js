@@ -1,6 +1,5 @@
 import { scrapeKnasta } from "./scrapers/knasta.js";
 import { scrapeParis } from "./scrapers/paris.js";
-import { scrapeAbc } from "./scrapers/abc.js";
 
 export async function conversation(from, profileName, text) {
   console.log(`🔎 Iniciando búsqueda para ${profileName} (${from})`);
@@ -15,13 +14,10 @@ export async function conversation(from, profileName, text) {
 
     console.log(`🛒 Producto solicitado: ${product}`);
 
-    //const knastaResults = await scrapeKnasta(product, 3);
-    //const parisResults = await scrapeParis(product, 3);
-    const abcResults = await scrapeAbc(product, 3);
+    const knastaResults = await scrapeKnasta(product, 3);
+    const parisResults = await scrapeParis(product, 3);
 
-    //const results = [...knastaResults, ...parisResults, ...abcResults];
-
-    const results = [...abcResults];
+    const results = [...knastaResults, ...parisResults];
 
     console.log(`✅ Total productos encontrados: ${results.length}`);
 

@@ -53,7 +53,6 @@ export async function scrapeParis(nombre_producto, limit = 3) {
       limit,
     );
 
-    console.log(`✅ Paris encontró ${data.length} productos válidos`);
     return data;
   } catch (error) {
     console.error("❌ Error Paris:", error.message);
