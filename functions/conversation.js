@@ -25,8 +25,6 @@ export async function conversation(from, profileName, text) {
       ...easyResults,
     ]);
 
-    //const results = [];
-
     console.log(`✅ Total productos encontrados: ${results.length}`);
 
     return results;
