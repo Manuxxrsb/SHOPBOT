@@ -34,3 +34,8 @@ export async function closeBrowser() {
     browser = null;
   }
 }
+
+// Función para resetear el estado (solo para testing)
+export function __resetBrowserState() {
+  browser = undefined;
+}

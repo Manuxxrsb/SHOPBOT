@@ -4,11 +4,12 @@ export function bestPrice(products) {
   const parsePrice = (price) => {
     if (!price) return Infinity;
 
-    return Number(
-      price
-        .replace(/[^\d]/g, "") // elimina $, puntos, espacios
-        .trim(),
-    );
+    const digitsOnly = price.replace(/[^\d]/g, "").trim();
+
+    // Si no hay dígitos después de filtrar, retorna Infinity
+    if (!digitsOnly) return Infinity;
+
+    return Number(digitsOnly);
   };
 
   // Filtramos productos con precio válido

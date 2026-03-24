@@ -6,7 +6,7 @@ export async function generateContent(apikey, prompt, text) {
     apiKey: apikey,
   });
 
-  const input = prompt + " " + text.slice(11).trim();
+  const input = prompt + " " + text.slice(7).trim();
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
